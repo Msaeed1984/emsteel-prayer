@@ -52,7 +52,7 @@ def check_prayer():
             arabic_name = ARABIC_NAMES.get(name, name)
 
             # 🕌 وقت الصلاة
-            if now_str == time_value:
+            if abs((datetime.strptime(time_value, "%H:%M") - datetime.now().replace(second=0, microsecond=0)).total_seconds()) < 60:
                 key = f"{name}_adhan"
 
                 if key not in notified_today:
@@ -66,7 +66,13 @@ def check_prayer():
             prayer_dt = datetime.strptime(time_value, "%H:%M")
             before_5 = (prayer_dt - timedelta(minutes=5)).strftime("%H:%M")
 
-            if now_str == before_5:
+            before_dt = datetime.strptime(before_5, "%H:%M").replace(
+                year=datetime.now().year,
+                month=datetime.now().month,
+                day=datetime.now().day
+            )
+
+            if abs((before_dt - datetime.now()).total_seconds()) < 60:
                 key = f"{name}_before"
 
                 if key not in notified_today:

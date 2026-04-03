@@ -1,8 +1,14 @@
 from winotify import Notification, audio
 
+from winotify import Notification, audio
+
 
 def show_notification(title, message):
     try:
+        # 🔐 تنظيف النص (حماية من أي مشاكل)
+        title = str(title)
+        message = str(message)
+
         toast = Notification(
             app_id="EMSTEEL Prayer",
             title=title,
@@ -10,7 +16,7 @@ def show_notification(title, message):
             duration="short"
         )
 
-        # 🔊 صوت خفيف (اختياري لكنه احترافي)
+        # 🔊 صوت خفيف احترافي
         toast.set_audio(audio.Default, loop=False)
 
         toast.show()

@@ -104,6 +104,30 @@ def get_next_prayer(prayer_times):
     return fajr_name, tomorrow_fajr.strftime("%H:%M"), remaining
 
 # =========================
+# 🔥 Tooltip
+# =========================
+def build_tooltip_text():
+    try:
+        data = calculate_prayer_times()
+
+        if not data:
+            return "EMSTEEL Prayer\nNo data"
+
+        next_name, next_time, remaining = get_next_prayer(data)
+
+        if not next_name:
+            return "🕌 EMSTEEL Prayer\n✔ انتهت صلوات اليوم"
+
+        hours, remainder = divmod(int(remaining.total_seconds()), 3600)
+        minutes, seconds = divmod(remainder, 60)
+
+        return f"🕌 EMSTEEL Prayer\n{format_name(next_name)} ({next_time})\n⏳ {hours:02}:{minutes:02}:{seconds:02}"
+
+    except Exception as e:
+        return "EMSTEEL Prayer"
+
+
+# =========================
 # تغيير اللغة
 # =========================
 
@@ -217,6 +241,14 @@ def refresh_menu(icon):
         except Exception as e:
             print("Menu refresh error:", e)
 
+def update_tooltip(icon):
+    while True:
+        try:
+            icon.title = build_tooltip_text()
+            time.sleep(30)
+        except Exception as e:
+            print("Tooltip error:", e)
+
 
 def run_tray():
     icon = pystray.Icon("EMSTEEL Prayer")
@@ -226,6 +258,9 @@ def run_tray():
 
     # 🔥 هذا أهم سطر في المشروع كله
     threading.Thread(target=refresh_menu, args=(icon,), daemon=True).start()
+    threading.Thread(target=update_tooltip, args=(icon,), daemon=True).start()
 
     print("Tray started...")
     icon.run()
+
+
