@@ -1,4 +1,4 @@
-('C:\\Users\\Administrator\\emsteel\\prayer_agent\\build\\Emsteel '
+('C:\\Users\\Administrator\\emsteel\\prayer_agent\\build\\EMSTEEL '
  'Prayer\\PYZ-00.pyz',
  [('PIL',
    'C:\\Users\\Administrator\\emsteel\\venv\\Lib\\site-packages\\PIL\\__init__.py',
@@ -630,8 +630,14 @@
   ('pprint',
    'C:\\Users\\Administrator\\AppData\\Local\\Python\\pythoncore-3.14-64\\Lib\\pprint.py',
    'PYMODULE'),
-  ('prayer_local',
-   'C:\\Users\\Administrator\\emsteel\\prayer_agent\\prayer_local.py',
+  ('prayer_calculator',
+   'C:\\Users\\Administrator\\emsteel\\prayer_agent\\prayer_calculator.py',
+   'PYMODULE'),
+  ('praytimes',
+   'C:\\Users\\Administrator\\emsteel\\venv\\Lib\\site-packages\\praytimes\\__init__.py',
+   'PYMODULE'),
+  ('praytimes.praytimes',
+   'C:\\Users\\Administrator\\emsteel\\venv\\Lib\\site-packages\\praytimes\\praytimes.py',
    'PYMODULE'),
   ('py_compile',
    'C:\\Users\\Administrator\\AppData\\Local\\Python\\pythoncore-3.14-64\\Lib\\py_compile.py',

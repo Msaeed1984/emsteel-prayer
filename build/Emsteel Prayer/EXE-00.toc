@@ -1,4 +1,4 @@
-('C:\\Users\\Administrator\\emsteel\\prayer_agent\\dist\\Emsteel Prayer.exe',
+('C:\\Users\\Administrator\\emsteel\\prayer_agent\\dist\\EMSTEEL Prayer.exe',
  False,
  False,
  False,
@@ -29,31 +29,31 @@
  None,
  None,
  None,
- 'C:\\Users\\Administrator\\emsteel\\prayer_agent\\build\\Emsteel '
- 'Prayer\\Emsteel Prayer.pkg',
+ 'C:\\Users\\Administrator\\emsteel\\prayer_agent\\build\\EMSTEEL '
+ 'Prayer\\EMSTEEL Prayer.pkg',
  [('pyi-contents-directory _internal', '', 'OPTION'),
   ('PYZ-00.pyz',
-   'C:\\Users\\Administrator\\emsteel\\prayer_agent\\build\\Emsteel '
+   'C:\\Users\\Administrator\\emsteel\\prayer_agent\\build\\EMSTEEL '
    'Prayer\\PYZ-00.pyz',
    'PYZ'),
   ('struct',
-   'C:\\Users\\Administrator\\emsteel\\prayer_agent\\build\\Emsteel '
+   'C:\\Users\\Administrator\\emsteel\\prayer_agent\\build\\EMSTEEL '
    'Prayer\\localpycs\\struct.pyc',
    'PYMODULE'),
   ('pyimod01_archive',
-   'C:\\Users\\Administrator\\emsteel\\prayer_agent\\build\\Emsteel '
+   'C:\\Users\\Administrator\\emsteel\\prayer_agent\\build\\EMSTEEL '
    'Prayer\\localpycs\\pyimod01_archive.pyc',
    'PYMODULE'),
   ('pyimod02_importers',
-   'C:\\Users\\Administrator\\emsteel\\prayer_agent\\build\\Emsteel '
+   'C:\\Users\\Administrator\\emsteel\\prayer_agent\\build\\EMSTEEL '
    'Prayer\\localpycs\\pyimod02_importers.pyc',
    'PYMODULE'),
   ('pyimod03_ctypes',
-   'C:\\Users\\Administrator\\emsteel\\prayer_agent\\build\\Emsteel '
+   'C:\\Users\\Administrator\\emsteel\\prayer_agent\\build\\EMSTEEL '
    'Prayer\\localpycs\\pyimod03_ctypes.pyc',
    'PYMODULE'),
   ('pyimod04_pywin32',
-   'C:\\Users\\Administrator\\emsteel\\prayer_agent\\build\\Emsteel '
+   'C:\\Users\\Administrator\\emsteel\\prayer_agent\\build\\EMSTEEL '
    'Prayer\\localpycs\\pyimod04_pywin32.pyc',
    'PYMODULE'),
   ('pyiboot01_bootstrap',
@@ -153,13 +153,13 @@
    'C:\\Users\\Administrator\\emsteel\\prayer_agent\\prayer_data.json',
    'DATA'),
   ('base_library.zip',
-   'C:\\Users\\Administrator\\emsteel\\prayer_agent\\build\\Emsteel '
+   'C:\\Users\\Administrator\\emsteel\\prayer_agent\\build\\EMSTEEL '
    'Prayer\\base_library.zip',
    'DATA')],
  [],
  False,
  False,
- 1775229579,
+ 1775243847,
  [('runw.exe',
    'C:\\Users\\Administrator\\emsteel\\venv\\Lib\\site-packages\\PyInstaller\\bootloader\\Windows-64bit-intel\\runw.exe',
    'EXECUTABLE')],

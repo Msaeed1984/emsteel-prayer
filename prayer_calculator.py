@@ -1,40 +1,32 @@
+import json
+import os
 from datetime import datetime
-from praytimes import PrayTimes
 
 
-def format_time(t):
+def load_prayer_data():
     try:
-        h, m = t.split(":")
-        return f"{int(h):02d}:{int(m):02d}"
-    except:
-        return t
+        base_path = getattr(__import__("sys"), "_MEIPASS", os.path.abspath("."))
+        file_path = os.path.join(base_path, "prayer_data.json")
+
+        with open(file_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+
+    except Exception as e:
+        print("Load error:", e)
+        return {}
 
 
 def calculate_prayer_times():
     try:
-        pt = PrayTimes('Makkah')
+        data = load_prayer_data()
 
-        # 🔥 ضبط دقيق للإمارات (مهم جداً)
-        pt.adjust({
-            'fajr': 18.2,
-            'isha': 18.2
-        })
+        today = datetime.now().strftime("%Y-%m-%d")
 
-        now = datetime.now()
+        if today in data:
+            return data[today]
 
-        times = pt.getTimes(
-            (now.year, now.month, now.day),
-            (24.4539, 54.3773),  # أبوظبي
-            4  # UTC+4
-        )
-
-        return {
-            "fajr": format_time(times['fajr']),
-            "dhuhr": format_time(times['dhuhr']),
-            "asr": format_time(times['asr']),
-            "maghrib": format_time(times['maghrib']),
-            "isha": format_time(times['isha']),
-        }
+        print("Date not found in JSON")
+        return None
 
     except Exception as e:
         print("Calculation error:", e)

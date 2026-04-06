@@ -2,6 +2,9 @@ import time
 from datetime import datetime, timedelta
 from notifier import show_notification
 from prayer_calculator import calculate_prayer_times
+import winsound
+from tray import show_popup
+import threading
 
 # =========================
 # إعدادات
@@ -12,17 +15,21 @@ ARABIC_NAMES = {
     "dhuhr": "الظهر",
     "asr": "العصر",
     "maghrib": "المغرب",
-    "isha": "العشاء"
+    "isha": "العشاء",
 }
 
 prayer_times = {}
 notified_today = set()
 last_reset_date = None
 
+# 🔥 وضع الاختبار (True = خلال 60 ثانية)
+TEST_MODE = True
+
 
 # =========================
 # تحميل أوقات الصلاة
 # =========================
+
 
 def load_times():
     global prayer_times
@@ -34,12 +41,15 @@ def load_times():
         print("Loaded CALCULATED prayer times:", prayer_times)
     else:
         print("ERROR: Failed to calculate prayer times")
+
+
 # =========================
 # التحقق من الصلاة
 # =========================
 
+
 def check_prayer():
-    now_str = datetime.now().strftime("%H:%M")
+    now = datetime.now()
 
     PRAYER_ORDER = ["fajr", "dhuhr", "asr", "maghrib", "isha"]
 
@@ -48,45 +58,86 @@ def check_prayer():
             continue
 
         time_value = prayer_times[name]
+
         try:
             arabic_name = ARABIC_NAMES.get(name, name)
 
-            # 🕌 وقت الصلاة
-            if abs((datetime.strptime(time_value, "%H:%M") - datetime.now().replace(second=0, microsecond=0)).total_seconds()) < 60:
-                key = f"{name}_adhan"
-
-                if key not in notified_today:
-                    show_notification(
-                        "🕌 وقت الصلاة",
-                        f"حان الآن وقت صلاة {arabic_name}"
-                    )
-                    notified_today.add(key)
-
-            # ⏳ قبل الصلاة بـ 5 دقائق
-            prayer_dt = datetime.strptime(time_value, "%H:%M")
-            before_5 = (prayer_dt - timedelta(minutes=5)).strftime("%H:%M")
-
-            before_dt = datetime.strptime(before_5, "%H:%M").replace(
-                year=datetime.now().year,
-                month=datetime.now().month,
-                day=datetime.now().day
+            # تحويل الوقت إلى datetime
+            prayer_dt = datetime.strptime(time_value, "%H:%M").replace(
+                year=now.year, month=now.month, day=now.day
             )
 
-            if abs((before_dt - datetime.now()).total_seconds()) < 60:
-                key = f"{name}_before"
+            before_5_dt = prayer_dt - timedelta(minutes=5)
 
-                if key not in notified_today:
+            key_before_10 = f"{name}_before10"
+            key_adhan = f"{name}_adhan"
+            key_before = f"{name}_before"
+
+            remaining_sec = 30
+
+            print(name, int(remaining_sec))  # Debug
+
+            # =========================
+            # ⏳ قبل 10 دقائق
+            # =========================
+            if TEST_MODE:
+                condition = 0 <= remaining_sec <= 60
+            else:
+                condition = 540 <= remaining_sec <= 600
+
+            if condition:
+                if key_before_10 not in notified_today:
+
+                    # Popup
+                    show_popup()
+
+                    # صوت
+                    play_alert_sound()
+
+                    notified_today.add(key_before_10)
+
+            # =========================
+            # 🕌 وقت الأذان
+            # =========================
+            if 0 <= remaining_sec <= 30:
+                if key_adhan not in notified_today:
+
+                    play_alert_sound()
+
+                    notified_today.add(key_adhan)
+
+            # =========================
+            # ⏳ قبل 5 دقائق
+            # =========================
+            if before_5_dt <= now < before_5_dt + timedelta(seconds=60):
+                if key_before not in notified_today:
+
                     show_notification(
-                        "⏳ تنبيه الصلاة",
-                        f"باقي 5 دقائق على صلاة {arabic_name}"
+                        "⏳ تنبيه الصلاة", f"باقي 5 دقائق على صلاة {arabic_name}"
                     )
-                    notified_today.add(key)
+
+                    notified_today.add(key_before)
 
         except Exception as e:
             print("Time parse error:", e)
+
+
+# =========================
+# الصوت
+# =========================
+
+
+def play_alert_sound():
+    try:
+        winsound.MessageBeep(winsound.MB_ICONEXCLAMATION)
+    except Exception as e:
+        print("Sound error:", e)
+
+
 # =========================
 # تشغيل النظام
 # =========================
+
 
 def run_scheduler():
     global last_reset_date
@@ -105,8 +156,8 @@ def run_scheduler():
 
         check_prayer()
 
-        # تحديث الأوقات مرة يومياً (اختياري ذكي)
+        # تحديث الأوقات يومياً
         if datetime.now().hour == 0 and datetime.now().minute < 2:
             load_times()
 
-        time.sleep(30)  # كل 30 ثانية (أدق بدون استهلاك)
+        time.sleep(20)
