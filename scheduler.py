@@ -1,10 +1,10 @@
 import time
-from datetime import datetime, timedelta
-from notifier import show_notification
-from prayer_calculator import calculate_prayer_times
+from datetime import datetime
+
 import winsound
+
+from prayer_calculator import calculate_prayer_times
 from tray import show_popup
-import threading
 
 # =========================
 # إعدادات
@@ -18,12 +18,11 @@ ARABIC_NAMES = {
     "isha": "العشاء",
 }
 
+PRAYER_ORDER = ["fajr", "dhuhr", "asr", "maghrib", "isha"]
+
 prayer_times = {}
 notified_today = set()
 last_reset_date = None
-
-# 🔥 وضع الاختبار (True = خلال 60 ثانية)
-TEST_MODE = True
 
 
 # =========================
@@ -34,13 +33,32 @@ TEST_MODE = True
 def load_times():
     global prayer_times
 
-    data = calculate_prayer_times()
+    try:
+        data = calculate_prayer_times()
 
-    if data:
-        prayer_times = data
-        print("Loaded CALCULATED prayer times:", prayer_times)
-    else:
-        print("ERROR: Failed to calculate prayer times")
+        if data:
+            prayer_times = data
+            print("Loaded CALCULATED prayer times:", prayer_times)
+        else:
+            print("ERROR: Failed to calculate prayer times")
+
+    except Exception as e:
+        print("Load times error:", e)
+
+
+# =========================
+# الصوت
+# =========================
+
+
+def play_alert_sound(mode="normal"):
+    try:
+        if mode == "early":
+            winsound.MessageBeep(winsound.MB_ICONASTERISK)
+        else:
+            winsound.MessageBeep(winsound.MB_ICONEXCLAMATION)
+    except Exception as e:
+        print("Sound error:", e)
 
 
 # =========================
@@ -51,8 +69,6 @@ def load_times():
 def check_prayer():
     now = datetime.now()
 
-    PRAYER_ORDER = ["fajr", "dhuhr", "asr", "maghrib", "isha"]
-
     for name in PRAYER_ORDER:
         if name not in prayer_times:
             continue
@@ -62,76 +78,53 @@ def check_prayer():
         try:
             arabic_name = ARABIC_NAMES.get(name, name)
 
-            # تحويل الوقت إلى datetime
             prayer_dt = datetime.strptime(time_value, "%H:%M").replace(
-                year=now.year, month=now.month, day=now.day
+                year=now.year,
+                month=now.month,
+                day=now.day,
+                second=0,
+                microsecond=0,
             )
 
-            before_5_dt = prayer_dt - timedelta(minutes=5)
+            remaining_sec = int((prayer_dt - now).total_seconds())
 
-            key_before_10 = f"{name}_before10"
+            # 🔒 تجاهل الصلوات اللي راحت بزمن طويل
+            if remaining_sec < -60:
+                continue
+
+            key_before5 = f"{name}_before5"
             key_adhan = f"{name}_adhan"
-            key_before = f"{name}_before"
 
-            remaining_sec = 30
-
-            print(name, int(remaining_sec))  # Debug
+            # 🔍 Debug ذكي (فقط قريب من الحدث)
+            if abs(remaining_sec) < 600:
+                print(f"{name}: {remaining_sec}s")
 
             # =========================
-            # ⏳ قبل 10 دقائق
+            # ⏳ قبل 5 دقائق
             # =========================
-            if TEST_MODE:
-                condition = 0 <= remaining_sec <= 60
-            else:
-                condition = 540 <= remaining_sec <= 600
+            if 300 <= remaining_sec <= 360:
+                if key_before5 not in notified_today:
+                    print(f"5 min reminder for {arabic_name}")
 
-            if condition:
-                if key_before_10 not in notified_today:
-
-                    # Popup
                     show_popup()
+                    play_alert_sound("early")
 
-                    # صوت
-                    play_alert_sound()
-
-                    notified_today.add(key_before_10)
+                    notified_today.add(key_before5)
 
             # =========================
             # 🕌 وقت الأذان
             # =========================
             if 0 <= remaining_sec <= 30:
                 if key_adhan not in notified_today:
+                    print(f"Adhan time reached for {arabic_name}")
 
-                    play_alert_sound()
+                    show_popup()
+                    play_alert_sound("normal")
 
                     notified_today.add(key_adhan)
 
-            # =========================
-            # ⏳ قبل 5 دقائق
-            # =========================
-            if before_5_dt <= now < before_5_dt + timedelta(seconds=60):
-                if key_before not in notified_today:
-
-                    show_notification(
-                        "⏳ تنبيه الصلاة", f"باقي 5 دقائق على صلاة {arabic_name}"
-                    )
-
-                    notified_today.add(key_before)
-
         except Exception as e:
-            print("Time parse error:", e)
-
-
-# =========================
-# الصوت
-# =========================
-
-
-def play_alert_sound():
-    try:
-        winsound.MessageBeep(winsound.MB_ICONEXCLAMATION)
-    except Exception as e:
-        print("Sound error:", e)
+            print(f"Time parse error for {name}: {e}")
 
 
 # =========================
@@ -146,18 +139,23 @@ def run_scheduler():
     load_times()
 
     while True:
-        today = datetime.now().date()
+        try:
+            today = datetime.now().date()
 
-        # إعادة التهيئة يومياً
-        if last_reset_date != today:
-            notified_today.clear()
-            last_reset_date = today
-            print("Reset notifications for new day")
+            # إعادة التهيئة يومياً
+            if last_reset_date != today:
+                notified_today.clear()
+                last_reset_date = today
+                print("Reset notifications for new day")
 
-        check_prayer()
+            check_prayer()
 
-        # تحديث الأوقات يومياً
-        if datetime.now().hour == 0 and datetime.now().minute < 2:
-            load_times()
+            # تحديث الأوقات يومياً بعد منتصف الليل
+            now = datetime.now()
+            if now.hour == 0 and now.minute < 2:
+                load_times()
+
+        except Exception as e:
+            print("Scheduler loop error:", e)
 
         time.sleep(20)
